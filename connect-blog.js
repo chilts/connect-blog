@@ -112,6 +112,15 @@ module.exports = function(args) {
         archive[year][month].push(post);
     });
 
+    // keep a list of all the tagCollection
+    var tagCollection = {};
+    posts.forEach(function(post) {
+        post.meta.tags.forEach(function(tag) {
+            tagCollection[tag] = tagCollection[tag] || [];
+            tagCollection[tag].push(post);
+        });
+    });
+
     return function(req, res, next) {
         if ( false ) {
             console.log('--- connect-blog ---');
@@ -124,7 +133,12 @@ module.exports = function(args) {
 
         var path = req.params.path;
         if ( !path ) {
-            return res.render('blog-index', { title : opts.title, posts : posts, latest : latest });
+            return res.render('blog-index', {
+                title   : opts.title,
+                posts   : posts,
+                latest  : latest,
+                archive : archive,
+            });
         }
 
         // look for a page that looks like a blog
@@ -206,10 +220,11 @@ module.exports = function(args) {
 
         if ( path === 'archive' ) {
             return res.render('blog-archive', {
-                title   : opts.title + ' Archive',
-                posts   : posts,
-                latest  : latest,
-                archive : archive,
+                title       : opts.title + ' Archive',
+                posts       : posts,
+                latest      : latest,
+                thisArchive : archive,
+                archive     : archive,
             });
         }
 
@@ -234,19 +249,37 @@ module.exports = function(args) {
             }
 
             return res.render('blog-archive', {
-                archive : thisArchive,
+                title       : opts.title + ' Archive',
+                posts       : posts,
+                latest      : latest,
+                archive     : archive,
+                thisArchive : thisArchive,
             });
         }
 
         if ( path.indexOf('tag:') === 0 ) {
-            return res.send('A Tag');
+            var parts = path.split(/:/);
+            var tagName = parts[1];
+            console.log('tagName=' + tagName);
+            if ( !tagCollection[tagName] ) {
+                // 404 - Not Found
+                return next();
+            }
+
+            return res.render('blog-tag', {
+                title : opts.title + ' : ' + tagName,
+                posts : tagCollection[tagName],
+                tag   : tagName,
+                archive     : archive,
+            });
         }
 
         // is this a post
         if ( post[path] ) {
             return res.render('blog-post', {
-                post  : post[path],
-                posts : posts,
+                post    : post[path],
+                posts   : posts,
+                archive : archive,
             });
         }
 
