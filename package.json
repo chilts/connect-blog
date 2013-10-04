@@ -3,5 +3,12 @@
     "version" : "0.1.0",
     "description" : "Blog middleware you can add to your Connect/Express app.",
 
-    "main" : "connect-blog.js"
+    "main" : "connect-blog.js",
+
+    "dependencies" : {
+        "data2xml" : "*",
+        "marked"   : "*",
+        "moment"   : "*",
+        "xtend"    : "*"
+    }
 }

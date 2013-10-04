@@ -15,6 +15,10 @@ var fs = require('fs');
 var moment = require('moment');
 var marked = require('marked');
 var xtend = require('xtend');
+var data2xml = require('data2xml')({
+    attrProp : '@',
+    valProp  : '#',
+});
 
 // ----------------------------------------------------------------------------
 
@@ -40,9 +44,7 @@ var months = {
 // ----------------------------------------------------------------------------
 
 module.exports = function(args) {
-    console.log('args:', args);
     var opts = xtend({}, defaults, args);
-    console.log('opts:', opts);
 
     if ( !opts.contentDir ) {
         throw new Error("Provide a contentDir");
@@ -69,7 +71,6 @@ module.exports = function(args) {
 
             // generate some fields
             var dt = post[basename].meta.datetime;
-            console.log('Yar=' + dt);
             post[basename].meta.year  = dt.substr(0, 4);
             post[basename].meta.month = dt.substr(5, 2);
             post[basename].meta.day   = dt.substr(8, 2);
@@ -77,8 +78,6 @@ module.exports = function(args) {
             post[basename].meta.monthname = months[post[basename].meta.month];
             post[basename].meta.moment = moment(dt);
             post[basename].meta.datetime = new Date(dt);
-
-            console.log(post[basename].meta);
         }
         if ( ext === 'md' ) {
             post[basename].content = contents;
@@ -113,8 +112,6 @@ module.exports = function(args) {
         archive[year][month].push(post);
     });
 
-    console.log('archive:', archive['2013']['10']);
-
     return function(req, res, next) {
         if ( false ) {
             console.log('--- connect-blog ---');
@@ -132,11 +129,79 @@ module.exports = function(args) {
 
         // look for a page that looks like a blog
         if ( path === 'rss20.xml' ) {
-            return res.send('RSS Feed');
+            // firstly, make the RSS feed
+            var rss = {
+                '@' : { version : '2.0' },
+                channel : {
+                    title         : opts.title,
+                    description   : opts.description,
+                    link          : 'http://' + opts.domain + opts.base + '/rss.xml',
+                    lastBuildDate : (new Date()).toISOString(),
+                    pubDate       : (new Date()).toISOString(),
+                    ttl           : 1800,
+                    item          : [],
+                }
+            };
+
+            rss.item = posts.map(function(post, i) {
+                return {
+                    title       : post.meta.title,
+                    description : post.html,
+                    link        : 'http://' + opts.domain + opts.base + '/' + post.name,
+                    guid        : 'http://' + opts.domain + opts.base + '/' + post.name,
+                    pubDate     : post.meta.date,
+                };
+            });
+
+            res.set('Content-Type', 'application/xml');
+            return res.send(data2xml('rss', rss));
         }
 
         if ( path === 'atom.xml' ) {
-            return res.send('Atom Feed');
+
+            var atom = {
+                '@'     : { xmlns : 'http://www.w3.org/2005/Atom' },
+                title   : opts.title,
+                link    : {
+                    '@' : {
+                        href : 'http://' + opts.domain + opts.base + '/atom.xml',
+                        rel  : 'self',
+                    },
+                },
+                updated : (new Date()).toISOString(),
+                id      : 'http://' + opts.domain + '/',
+                author  : {
+                    name  : 'Andrew Chilton',
+                    email : 'andychilton@gmail.com',
+                },
+                entry   : [],
+            };
+
+            atom.entry = posts.map(function(post, i) {
+                return {
+                    title   : post.meta.title,
+                    id      : 'http://' + opts.domain + opts.base + '/' + post.name,
+                    link    : [
+                        {
+                            '@' : { href : 'http://' + opts.domain + opts.base + '/' + post.name }
+                        },
+                        {
+                            '@' : {
+                                href : 'http://' + opts.domain + opts.base + '/' + post.name,
+                                rel : 'self'
+                            }
+                        }
+                    ],
+                    content : {
+                        '@' : { type : 'html' },
+                        '#' : post.html,
+                    },
+                    updated : post.meta.datetime,
+                };
+            });
+
+            res.set('Content-Type', 'application/xml');
+            return res.send(data2xml('feed', atom));
         }
 
         if ( path === 'archive' ) {
@@ -154,23 +219,16 @@ module.exports = function(args) {
             var parts = path.split(/:/)[1].split(/\-/);
             var thisYear = parts[0];
             var thisMonth = parts[1];
-            console.log(thisYear, thisMonth);
-            console.log(parts.length);
-            console.log(archive[thisYear]);
-            console.log(parts.length === 1 && thisArchive[thisYear]);
             if ( parts.length === 1 && archive[thisYear] ) {
-                console.log('a');
                 thisArchive[thisYear] = archive[thisYear];
                 res.locals.title = 'Archive for ' + thisYear;
             }
             else if ( parts.length === 2 && archive[thisYear] && archive[thisYear][thisMonth] ) {
-                console.log('b');
                 thisArchive[thisYear] = {};
                 thisArchive[thisYear][thisMonth] = archive[thisYear][thisMonth];
                 res.locals.title = 'Archive for ' + months[thisMonth] + ' ' + thisYear;
             }
             else {
-                console.log('c');
                 // don't know this format
                 return next();
             }
