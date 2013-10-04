@@ -150,8 +150,8 @@ module.exports = function(args) {
                     title         : opts.title,
                     description   : opts.description,
                     link          : 'http://' + opts.domain + opts.base + '/rss.xml',
-                    lastBuildDate : (new Date()).toISOString(),
-                    pubDate       : (new Date()).toISOString(),
+                    lastBuildDate : moment().format("ddd, DD MMM YYYY HH:MM:SS Z"),
+                    pubDate       : moment().format("ddd, DD MMM YYYY HH:MM:SS Z"),
                     ttl           : 1800,
                     item          : [],
                 }
@@ -163,7 +163,7 @@ module.exports = function(args) {
                     description : post.html,
                     link        : 'http://' + opts.domain + opts.base + '/' + post.name,
                     guid        : 'http://' + opts.domain + opts.base + '/' + post.name,
-                    pubDate     : post.meta.date,
+                    pubDate     : post.meta.moment.format("ddd, DD MMM YYYY HH:MM:SS Z"),
                 };
             });
 
@@ -182,7 +182,7 @@ module.exports = function(args) {
                         rel  : 'self',
                     },
                 },
-                updated : (new Date()).toISOString(),
+                updated : moment().format(),
                 id      : 'http://' + opts.domain + '/',
                 author  : {
                     name  : 'Andrew Chilton',
@@ -210,7 +210,7 @@ module.exports = function(args) {
                         '@' : { type : 'html' },
                         '#' : post.html,
                     },
-                    updated : post.meta.datetime,
+                    updated : post.meta.moment.format(),
                 };
             });
 
