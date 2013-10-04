@@ -1,0 +1,7 @@
+{
+    "name" : "connect-blog",
+    "version" : "0.1.0",
+    "description" : "Blog middleware you can add to your Connect/Express app.",
+
+    "main" : "connect-blog.js"
+}
