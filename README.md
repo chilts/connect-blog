@@ -45,16 +45,18 @@ By keeping to this structure, 'connect-blog' knows where to find everything. An 
 
 ```
 {
+    "title" : "My First Post",
     "datetime : "2013-10-04T02:02:17.516Z",
     "tags" : [ "css", "html5", "javascript", "app" ]
 }
 ```
 
-Please note that the date/time of the post comes from the ```datetime``` field and it must be parseable by ```new
-Date(datetime)```. The year and month of that date is also used in the archive. The datetime is used in pretty much
-everywhere (posts, archive, RSS feed, Atom feed). The tags are used for the tags part of the site.
+Please note that the published time of the post comes from the ```datetime``` field and it must be parseable by ```new
+Date(datetime)```. The year and month of that date is also used in the archive. The datetime is used in all templates
+(index, post, archive, tag) and the feeds (RSS, Atom). The ```tags``` are used for the taggging posts and in the
+tagcloud template. (Of course, you need to write the templates yourself so this could change.)
 
-You can add in any other data you like here which you need in the templates.
+You can add in any other data you like this ```*.json``` file that you may need in the templates related to each post.
 
 ## Synopsis ##
 
