@@ -76,7 +76,13 @@ module.exports = function(args) {
         var contents = fs.readFileSync(opts.contentDir + '/' + filename, 'utf8');
 
         if ( ext === 'json' ) {
-            post[basename].meta = JSON.parse(contents);
+            try {
+                post[basename].meta = JSON.parse(contents);
+            }
+            catch (e) {
+                console.warn('Error parsing ' + filename + ' file : ' + e);
+                process.exit(2);
+            }
 
             // generate some fields
             var dt = post[basename].meta.datetime;
