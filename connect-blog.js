@@ -138,6 +138,7 @@ module.exports = function(args) {
                 posts   : posts,
                 latest  : latest,
                 archive : archive,
+                tags    : tagCollection,
             });
         }
 
@@ -225,6 +226,7 @@ module.exports = function(args) {
                 latest      : latest,
                 thisArchive : archive,
                 archive     : archive,
+                tags        : tagCollection,
             });
         }
 
@@ -254,6 +256,7 @@ module.exports = function(args) {
                 latest      : latest,
                 archive     : archive,
                 thisArchive : thisArchive,
+                tags        : tagCollection,
             });
         }
 
@@ -270,7 +273,8 @@ module.exports = function(args) {
                 title : opts.title + ' : ' + tagName,
                 posts : tagCollection[tagName],
                 tag   : tagName,
-                archive     : archive,
+                archive : archive,
+                tags  : tagCollection,
             });
         }
 
@@ -280,6 +284,7 @@ module.exports = function(args) {
                 post    : post[path],
                 posts   : posts,
                 archive : archive,
+                tags        : tagCollection,
             });
         }
 
