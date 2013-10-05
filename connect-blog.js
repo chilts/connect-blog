@@ -121,7 +121,7 @@ module.exports = function(args) {
         });
     });
 
-    return function(req, res, next) {
+    var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
         res.locals.title   = opts.title;
         res.locals.posts   = posts;
@@ -274,6 +274,15 @@ module.exports = function(args) {
         // didn't find anything interesting, pass it on
         next();
     };
+
+    // prior to returning, let's put these vars onto this middleware so
+    // the user can get access to some interesting things
+    middleware.posts   = posts;
+    middleware.latest  = latest;
+    middleware.archive = archive;
+    middleware.tagged  = tagged;
+
+    return middleware;
 };
 
 // ----------------------------------------------------------------------------
