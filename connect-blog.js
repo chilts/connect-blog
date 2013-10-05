@@ -157,7 +157,7 @@ module.exports = function(args) {
                 channel : {
                     title         : opts.title,
                     description   : opts.description,
-                    link          : 'http://' + opts.domain + opts.base + '/rss.xml',
+                    link          : 'http://' + opts.domain + opts.base + '/rss20.xml',
                     lastBuildDate : moment().format("ddd, DD MMM YYYY HH:MM:SS ZZ"),
                     pubDate       : moment().format("ddd, DD MMM YYYY HH:MM:SS ZZ"),
                     ttl           : 1800,
@@ -165,7 +165,7 @@ module.exports = function(args) {
                 }
             };
 
-            rss.item = posts.map(function(post, i) {
+            rss.channel.item = posts.map(function(post, i) {
                 return {
                     title       : post.meta.title,
                     description : post.html,
