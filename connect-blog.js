@@ -22,8 +22,12 @@ var data2xml = require('data2xml')({
 
 // ----------------------------------------------------------------------------
 
-var defaults = {
+var defaults = { 
+    title       : 'Blog',
+    description : '',
+    contentDir  : 'blog',
     latestCount : 10,
+    basePath    : '',
 };
 
 var months = {
@@ -46,8 +50,8 @@ var months = {
 module.exports = function(args) {
     var opts = xtend({}, defaults, args);
 
-    if ( !opts.contentDir ) {
-        throw new Error("Provide a contentDir");
+    if ( !opts.domain ) {
+        throw new Error("Provide a domain");
     }
 
     var post  = {};
