@@ -213,7 +213,7 @@ module.exports = function(args) {
 
         if ( path === 'archive' ) {
             return res.render('blog-archive', {
-                title       : opts.title + ' Archive',
+                title       : opts.title + ' : Archive',
                 thisArchive : archive,
             });
         }
@@ -226,12 +226,10 @@ module.exports = function(args) {
             var thisMonth = parts[1];
             if ( parts.length === 1 && archive[thisYear] ) {
                 thisArchive[thisYear] = archive[thisYear];
-                res.locals.title = 'Archive for ' + thisYear;
             }
             else if ( parts.length === 2 && archive[thisYear] && archive[thisYear][thisMonth] ) {
                 thisArchive[thisYear] = {};
                 thisArchive[thisYear][thisMonth] = archive[thisYear][thisMonth];
-                res.locals.title = 'Archive for ' + months[thisMonth] + ' ' + thisYear;
             }
             else {
                 // don't know this format
@@ -239,14 +237,14 @@ module.exports = function(args) {
             }
 
             return res.render('blog-archive', {
-                title       : opts.title + ' Archive',
+                title       : opts.title + ' : Archive : ' + thisYear + (thisMonth ? '-' + thisMonth : ''),
                 thisArchive : thisArchive,
             });
         }
 
         if ( path === 'tag' ) {
             return res.render('blog-tagcloud', {
-                title : opts.title + ' TagCloud',
+                title : opts.title + ' : TagCloud',
             });
         }
 
@@ -259,7 +257,7 @@ module.exports = function(args) {
             }
 
             return res.render('blog-tag', {
-                title       : opts.title + ' : ' + tagName,
+                title       : opts.title + ' : Tag : ' + tagName,
                 thesePosts  : tagged[tagName],
                 thisTagName : tagName,
             });
@@ -268,7 +266,7 @@ module.exports = function(args) {
         // is this a post
         if ( post[path] ) {
             return res.render('blog-post', {
-                title    : post[path].meta.title,
+                title    : opts.title + ' : ' + post[path].meta.title,
                 thisPost : post[path],
             });
         }
