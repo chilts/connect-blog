@@ -268,6 +268,7 @@ module.exports = function(args) {
         // is this a post
         if ( post[path] ) {
             return res.render('blog-post', {
+                title    : post[path].meta.title,
                 thisPost : post[path],
             });
         }

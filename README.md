@@ -31,6 +31,7 @@ This will serve the following pages:
 /blog/archive:<year>-<month> - renders 'blog-archive' template
 /blog/tag                    - renders 'blog-tagcloud' template
 /blog/tag:<tag-name>         - renders 'blog-tag' template
+/blog/<post-name>            - renders 'blog-post' template
 ```
 
 Each template gets access to the following variables:
@@ -64,6 +65,79 @@ archive = {
         '10' : [ ...posts ... ],
     },
 };
+```
+
+## Routes ##
+
+When a route is rendered it is called as follows so that it is independent of whatever template language you have already set up.
+
+```
+res.render('blog-post');
+```
+
+The ```/rss20.xml``` and ```/atom.xml``` do not call a template since the XML is generated within the middleware. They
+only look at the ```opts``` originally passed in to create the middleware and the ```latest``` variable.
+
+### Blog Index ###
+
+```
+Page     : /
+Template : 'blog-index'
+Locals   : (none)
+```
+
+### Archive Index ###
+
+```
+Page     : /archive
+Template : 'blog-archive'
+Locals   : title -> opts.title + ' Archive'
+         : thisArchive -> archive
+```
+
+### Year Archive ###
+
+```
+Page     : /archive:<year>
+Template : 'blog-archive'
+Locals   : title -> opts.title + ' Archive'
+         : thisArchive -> archive[year]
+```
+
+### Month Archive ###
+
+```
+Page     : /archive:<year>-<month>
+Template : 'blog-archive'
+Locals   : title -> opts.title + ' Archive'
+         : thisArchive -> archive[year][month]
+```
+
+### Tag Index ###
+
+```
+Page     : /tag
+Template : 'blog-tagcloud'
+Locals   : title -> opts.title + ' TagCloud'
+```
+
+### Specific Tag ###
+
+```
+Page     : /tag:<name>
+Template : 'blog-tag'
+Locals   : title -> opts.title + ' : ' + tag
+         : thesePosts -> tagged[tag]
+         : thisTagName -> tag
+```
+
+### Post ###
+
+```
+Page     : /<post-name>
+Template : 'blog-post'
+Locals   : title -> post.meta.title
+         : thisPost -> post[postName]
 ```
 
 # Author #
