@@ -95,11 +95,11 @@ module.exports = function(args) {
         return a.meta.datetime > b.meta.datetime;
     });
 
-    // set up some vars, like latest, archive (etc)
+    // set up an easy way to access the latest posts
     latest = posts.reverse().slice(0, opts.latestCount);
 
+    // make the archive
     var archive = {};
-
     posts.forEach(function(post) {
         var year = post.meta.year;
         var month = post.meta.month;
@@ -112,34 +112,26 @@ module.exports = function(args) {
         archive[year][month].push(post);
     });
 
-    // keep a list of all the tagCollection
-    var tagCollection = {};
+    // keep a list of all the tagged
+    var tagged = {};
     posts.forEach(function(post) {
         post.meta.tags.forEach(function(tag) {
-            tagCollection[tag] = tagCollection[tag] || [];
-            tagCollection[tag].push(post);
+            tagged[tag] = tagged[tag] || [];
+            tagged[tag].push(post);
         });
     });
 
     return function(req, res, next) {
-        if ( false ) {
-            console.log('--- connect-blog ---');
-            console.log('path=' + req.path);
-            console.log('url=' + req.url);
-            console.log('params:', req.params);
-            console.log('query:', req.query);
-            console.log('body:', req.body);
-        }
+        // for every page (and a side-effect for the feeds), give them each access to these things
+        res.locals.title   = opts.title;
+        res.locals.posts   = posts;
+        res.locals.latest  = latest;
+        res.locals.archive = archive;
+        res.locals.tagged  = tagged;
 
         var path = req.params.path;
         if ( !path ) {
-            return res.render('blog-index', {
-                title   : opts.title,
-                posts   : posts,
-                latest  : latest,
-                archive : archive,
-                tags    : tagCollection,
-            });
+            return res.render('blog-index');
         }
 
         // look for a page that looks like a blog
@@ -222,11 +214,7 @@ module.exports = function(args) {
         if ( path === 'archive' ) {
             return res.render('blog-archive', {
                 title       : opts.title + ' Archive',
-                posts       : posts,
-                latest      : latest,
                 thisArchive : archive,
-                archive     : archive,
-                tags        : tagCollection,
             });
         }
 
@@ -252,39 +240,35 @@ module.exports = function(args) {
 
             return res.render('blog-archive', {
                 title       : opts.title + ' Archive',
-                posts       : posts,
-                latest      : latest,
-                archive     : archive,
                 thisArchive : thisArchive,
-                tags        : tagCollection,
+            });
+        }
+
+        if ( path === 'tag' ) {
+            return res.render('blog-tagcloud', {
+                title : opts.title + ' TagCloud',
             });
         }
 
         if ( path.indexOf('tag:') === 0 ) {
             var parts = path.split(/:/);
             var tagName = parts[1];
-            console.log('tagName=' + tagName);
-            if ( !tagCollection[tagName] ) {
+            if ( !tagged[tagName] ) {
                 // 404 - Not Found
                 return next();
             }
 
             return res.render('blog-tag', {
-                title : opts.title + ' : ' + tagName,
-                posts : tagCollection[tagName],
-                tag   : tagName,
-                archive : archive,
-                tags  : tagCollection,
+                title       : opts.title + ' : ' + tagName,
+                thesePosts  : tagged[tagName],
+                thisTagName : tagName,
             });
         }
 
         // is this a post
         if ( post[path] ) {
             return res.render('blog-post', {
-                post    : post[path],
-                posts   : posts,
-                archive : archive,
-                tags        : tagCollection,
+                thisPost : post[path],
             });
         }
 
