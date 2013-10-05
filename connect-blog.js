@@ -64,6 +64,11 @@ module.exports = function(args) {
         var basename = parts[0];
         var ext = parts[1];
 
+        // strip any initial numbers from the post name
+        if ( basename.match(/^\d+-/) ) {
+            basename = basename.replace(/^\d+-/, '');
+        }
+
         post[basename] = post[basename] || {
             name : basename,
         };
