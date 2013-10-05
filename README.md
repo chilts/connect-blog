@@ -2,6 +2,62 @@
 
 ## Synopsis ##
 
+```
+var connectBlog = require('connect-blog');
+
+var blog = connectBlog({
+    domain : 'example.com',
+});
+
+// later on
+app.get('/', blog);
+app.get('/:path', blog);
+```
+
+This example will serve this blog at the root level of the ```example.com``` domain. You must set both ```/``` and
+```/:path``` so that we can determine in the middleware whether to show the index page or something else. The
+```/:path``` parameter must also be called ```path```, not anything else.
+
+## What is connect-blog ##
+
+'connect-blog' is middleware for Express/Connect. It can read a directory full of static ```*.md``` and ```*.json``` files
+and then serve up a blog for you. Each post should consist of two files.
+
+Imagine a post called ```my-first-post```. Therefore, you require:
+
+* my-first-post.md
+* my-first-post.json
+
+Once 'connect-blog' has read those files in, it will create a structure similar to the following:
+
+```
+{
+    name    : 'my-first-post',
+    content : ' ... the markdown from the *.md file ... ',
+    html    : ' ... the HTML from the MarkDown conversion ... ',
+    meta    : {
+        // then entire data read from the *.json file
+    }
+}
+```
+
+By keeping to this structure, 'connect-blog' knows where to find everything. An example ```*.json``` file would be:
+
+```
+{
+    "datetime : "2013-10-04T02:02:17.516Z",
+    "tags" : [ "css", "html5", "javascript", "app" ]
+}
+```
+
+Please note that the date/time of the post comes from the ```datetime``` field and it must be parseable by ```new
+Date(datetime)```. The year and month of that date is also used in the archive. The datetime is used in pretty much
+everywhere (posts, archive, RSS feed, Atom feed). The tags are used for the tags part of the site.
+
+You can add in any other data you like here which you need in the templates.
+
+## Synopsis ##
+
 To set up a blog from within Express, try this:
 
 ```
@@ -65,6 +121,27 @@ archive = {
         '10' : [ ...posts ... ],
     },
 };
+```
+
+## Default Options ##
+
+The default options have reasonable (not necessarily sensible) defaults for each of these keys, so the only onw you MUST provide
+is the ```domain```.
+
+```
+var opts = {
+    title       : 'Blog',
+    description : '',
+    contentDir  : 'blog',
+    latestCount : 10,
+    basePath    : '',
+};
+```
+
+So, to go with defaults you can just call:
+
+```
+var blogMiddleware = connectBlog({ domain : 'example.com' });
 ```
 
 ## Routes ##
