@@ -1,7 +1,7 @@
 {
     "name" : "connect-blog",
-    "version" : "0.1.0",
     "description" : "Blog middleware you can add to your Connect/Express app.",
+    "version" : "0.1.0",
 
     "main" : "connect-blog.js",
 
@@ -10,5 +10,26 @@
         "marked"   : "*",
         "moment"   : "*",
         "xtend"    : "*"
-    }
+    },
+
+    "homepage" : "https://github.com/chilts/connect-blog",
+    "repository" : {
+        "type" : "git",
+        "url" : "git://github.com/chilts/connect-blog.git"
+    },
+    "bugs" : {
+        "url" : "https://github.com/chilts/connect-blog/issues",
+        "email" : "andychilton@gmail.com"
+    },
+
+    "author" : {
+        "name" : "Andrew Chilton",
+        "email" : "andychilton@gmail.com",
+        "url" : "http://chilts.org/"
+    },
+    "licenses" : [{
+        "type" : "MIT",
+        "url" : "http://chilts.mit-license.org/2013"
+    }],
+    "tags" : [ "connect", "express", "blog", "feed" ]
 }
