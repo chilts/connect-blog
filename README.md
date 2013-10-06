@@ -104,12 +104,12 @@ e.g.
 
 ```
 title  = opts.title;
-posts  = [ { ... }, { ... }, ... ];
-latest = [ { ... }, { ... }, ... ];
+posts  = [ ...posts... ];
+latest = [ ...posts... ];
 tagged = {
-    tag1 : { ... },
-    tag2 : { ... },
-    tag3 : { ... },
+    tag1 : [ ...posts... ],
+    tag2 : [ ...posts... ],
+    tag3 : [ ...posts... ],
 };
 archive = {
     '2013' : {
