@@ -57,6 +57,9 @@ module.exports = function(args) {
     var post  = {};
     var posts = [];
 
+    var now = new Date();
+    var nowMoment = moment(now);
+
     // read all the files from the content dir
     var files = fs.readdirSync(opts.contentDir);
     files.forEach(function(filename) {
@@ -69,8 +72,21 @@ module.exports = function(args) {
             basename = basename.replace(/^\d+-/, '');
         }
 
+        // set this to a default post with the 'name'
         post[basename] = post[basename] || {
-            name : basename,
+            name    : basename,
+            meta    : {
+                title     : basename.split(/-/).map(function(str) { return str.substr(0, 1).toUpperCase() + str.substr(1); }).join(' '),
+                datetime  : now,
+                moment    : nowMoment,
+                year      : nowMoment.format('YYYY'),
+                month     : nowMoment.format('MM'),
+                day       : nowMoment.format('DD'),
+                monthname : nowMoment.format('MMMM'),
+                tags    : [],
+            },
+            content : '',
+            html    : '',
         };
 
         var contents = fs.readFileSync(opts.contentDir + '/' + filename, 'utf8');
@@ -84,15 +100,17 @@ module.exports = function(args) {
                 process.exit(2);
             }
 
-            // generate some fields
-            var dt = post[basename].meta.datetime;
-            post[basename].meta.year  = dt.substr(0, 4);
-            post[basename].meta.month = dt.substr(5, 2);
-            post[basename].meta.day   = dt.substr(8, 2);
+            // save this datetime as a regular JavaScript Date()
+            post[basename].meta.datetime = new Date(post[basename].meta.datetime);
 
-            post[basename].meta.monthname = months[post[basename].meta.month];
-            post[basename].meta.moment = moment(dt);
-            post[basename].meta.datetime = new Date(dt);
+            // now save it as a moment()
+            var dtMoment = moment(post[basename].meta.datetime);
+            post[basename].meta.year  = dtMoment.format('YYYY');
+            post[basename].meta.month = dtMoment.format('MM');
+            post[basename].meta.day   = dtMoment.format('DD');
+
+            post[basename].meta.monthname = dtMoment.format('MMMM');
+            post[basename].meta.moment = dtMoment;
         }
         if ( ext === 'md' ) {
             post[basename].content = contents;
