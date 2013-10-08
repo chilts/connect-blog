@@ -58,6 +58,32 @@ tagcloud template. (Of course, you need to write the templates yourself so this 
 
 You can add in any other data you like this ```*.json``` file that you may need in the templates related to each post.
 
+A default post is set up once either of these files are read. The default post looks like:
+
+```
+var now = new Date();
+var nowMoment = moment(now);
+{
+    name : '...', // same as the filename, e.g. basename.json or basename.md
+    meta : {
+        title     : basename.split(/-/).map(function(str) { return str.substr(0, 1).toUpperCase() + str.substr(1); }).join(' '),
+        datetime  : now,
+        moment    : nowMoment,
+        year      : nowMoment.format('YYYY'),
+        month     : nowMoment.format('MM'),
+        day       : nowMoment.format('DD'),
+        monthname : nowMoment.format('MMMM'),
+        tags    : [],
+    },
+    content : '',
+    html    : '',
+}
+```
+
+This default post is set so that if you just have ```basename.md``` and no ```basename.json```, then the blog will
+still render and not throw errors. Same if you have ```basename.json``` but not ```basename.md``` (but that wouldn't be
+much good either).
+
 ## Synopsis ##
 
 To set up a blog from within Express, try this:
