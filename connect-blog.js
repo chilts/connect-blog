@@ -110,7 +110,11 @@ module.exports = function(args) {
         return post[name];
     }).sort(function(a, b) {
         // sort on datetime
-        return a.meta.datetime > b.meta.datetime;
+        if ( a.meta.datetime.toISOString() < b.meta.datetime.toISOString() )
+            return -1;
+        if ( a.meta.datetime.toISOString() > b.meta.datetime.toISOString() )
+            return 1;
+        return 0;
     });
 
     // set up an easy way to access the latest posts
