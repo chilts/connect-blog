@@ -161,8 +161,8 @@ module.exports = function(args) {
                     title         : opts.title,
                     description   : opts.description,
                     link          : 'http://' + opts.domain + opts.base + '/rss20.xml',
-                    lastBuildDate : moment().format("ddd, DD MMM YYYY HH:MM:SS ZZ"),
-                    pubDate       : moment().format("ddd, DD MMM YYYY HH:MM:SS ZZ"),
+                    lastBuildDate : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+                    pubDate       : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
                     ttl           : 1800,
                     item          : [],
                 }
@@ -174,7 +174,7 @@ module.exports = function(args) {
                     description : post.html,
                     link        : 'http://' + opts.domain + opts.base + '/' + post.name,
                     guid        : 'http://' + opts.domain + opts.base + '/' + post.name,
-                    pubDate     : post.meta.moment.format("ddd, DD MMM YYYY HH:MM:SS ZZ"),
+                    pubDate     : post.meta.moment.format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
                 };
             });
 
