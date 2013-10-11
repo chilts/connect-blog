@@ -122,6 +122,7 @@ Each template gets access to the following variables:
 
 * title - the 'title' you passed in when setting the blog up
 * posts - a chronological array of all posts
+* pages - all the posts split up into pages (using opts.indexCount)
 * latest - a reversed list of the latest 10 posts (defined by opts.latestCount)
 * tagged - an object of each tag, each containing an array of posts
 * archive - an object of year numbers, each an object of month numbers, each an array of posts
@@ -161,7 +162,8 @@ var opts = {
     title       : 'Blog',
     description : '',
     contentDir  : 'blog',
-    latestCount : 10,
+    indexCount  : 10,
+    latestCount : 20,
     basePath    : '',
 };
 ```

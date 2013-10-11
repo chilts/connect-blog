@@ -26,7 +26,8 @@ var defaults = {
     title       : 'Blog',
     description : '',
     contentDir  : 'blog',
-    latestCount : 10,
+    indexCount  : 10,
+    latestCount : 20,
     basePath    : '',
 };
 
@@ -117,8 +118,18 @@ module.exports = function(args) {
         return 0;
     });
 
+    // get a copy of all the posts but reversed
+    var reverse = posts.slice(0);
+    reverse.reverse();
+
     // set up an easy way to access the latest posts
-    latest = posts.reverse().slice(0, opts.latestCount);
+    latest = reverse.slice(0, opts.latestCount);
+
+    // make the index pages
+    var pages = [];
+    for ( var i = 0; i < posts.length; i += opts.indexCount ) {
+        pages.push(reverse.slice(i, i + opts.indexCount));
+    }
 
     // make the archive
     var archive = {};
@@ -147,13 +158,22 @@ module.exports = function(args) {
         // for every page (and a side-effect for the feeds), give them each access to these things
         res.locals.title   = opts.title;
         res.locals.posts   = posts;
+        res.locals.pages   = pages;
         res.locals.latest  = latest;
         res.locals.archive = archive;
         res.locals.tagged  = tagged;
+        res.locals.prevUrl = undefined;
+        res.locals.nextUrl = undefined;
 
         var path = req.params.path;
+
         if ( !path ) {
-            return res.render('blog-index');
+            return res.render('blog-index', {
+                thesePosts : pages[0],
+                page       : 1,
+                prevUrl    : undefined,
+                nextUrl    : pages.length > 1 ? './page:2' : undefined,
+            });
         }
 
         // look for a page that looks like a blog
@@ -233,6 +253,28 @@ module.exports = function(args) {
             return res.send(data2xml('feed', atom));
         }
 
+        if ( path.indexOf('page:') === 0 ) {
+            // Note: the pages are 1..10, but our pages array is 0..9.
+            var page = path.split(/:/)[1];
+
+            // Note1: can return NaN, which will fail the following 'if'.
+            // Note2: we use +page rather than parseInt(page, 10) since
+            //        '1asd' won't give a 1 in the first case, but in the second it will.
+            page = +page;
+
+            if ( page > 0 && page <= pages.length ) {
+                return res.render('blog-index', {
+                    thesePosts : pages[page-1],
+                    page       : page,
+                    prevUrl    : page > 1 ? './page:' + (page-1) : undefined,
+                    nextUrl    : page < pages.length ? './page:' + (page+1) : undefined,
+                });
+            }
+
+            // unknown page
+            return next();
+        }
+
         if ( path === 'archive' ) {
             return res.render('blog-archive', {
                 title       : opts.title + ' : Archive',
@@ -240,7 +282,6 @@ module.exports = function(args) {
             });
         }
 
-        // do we even need this 'archive' stuff anymore ... seriously?
         if ( path.indexOf('archive:') === 0 ) {
             var thisArchive = {};
             var parts = path.split(/:/)[1].split(/\-/);
