@@ -166,24 +166,33 @@ module.exports = function(args) {
 
     var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
-        res.locals.title   = opts.title;
-        res.locals.posts   = posts;
-        res.locals.pages   = pages;
-        res.locals.latest  = latest;
-        res.locals.archive = archive;
-        res.locals.tagged  = tagged;
-        res.locals.prevUrl = undefined;
-        res.locals.nextUrl = undefined;
+        res.locals.blog = {
+            title   : opts.title,
+            posts   : posts,
+            pages   : pages,
+            latest  : latest,
+            archive : archive,
+            tagged  : tagged,
+
+            // Others:
+            // * thisPost
+            // * thisArchive
+            // * thisTagName
+            // * thisTag
+            // * thesePosts - for blog-index, ???
+            // * thisPageNum - for blog-index
+            // * prevUrl \_ for blog-post, blog-archive and blog-index
+            // * nextUrl /
+        };
 
         var path = req.params.path;
 
         if ( !path ) {
-            return res.render('blog-index', {
-                thesePosts : pages[0],
-                page       : 1,
-                prevUrl    : undefined,
-                nextUrl    : pages.length > 1 ? './page:2' : undefined,
-            });
+            res.locals.blog.thesePosts  = pages[0];
+            res.locals.blog.thisPageNum = 1;
+            res.locals.blog.prevUrl     = undefined;
+            res.locals.blog.nextUrl     = pages.length > 1 ? './page:2' : undefined;
+            return res.render('blog-index');
         }
 
         // look for a page that looks like a blog
@@ -273,12 +282,11 @@ module.exports = function(args) {
             page = +page;
 
             if ( page > 0 && page <= pages.length ) {
-                return res.render('blog-index', {
-                    thesePosts : pages[page-1],
-                    page       : page,
-                    prevUrl    : page > 1 ? './page:' + (page-1) : undefined,
-                    nextUrl    : page < pages.length ? './page:' + (page+1) : undefined,
-                });
+                res.locals.blog.thesePosts  = pages[page-1];
+                res.locals.blog.thisPageNum = page;
+                res.locals.blog.prevUrl     = page > 1 ? './page:' + (page-1) : undefined;
+                res.locals.blog.nextUrl     = page < pages.length ? './page:' + (page+1) : undefined;
+                return res.render('blog-index');
             }
 
             // unknown page
@@ -286,10 +294,8 @@ module.exports = function(args) {
         }
 
         if ( path === 'archive' ) {
-            return res.render('blog-archive', {
-                title       : opts.title + ' : Archive',
-                thisArchive : archive,
-            });
+            res.locals.blog.title = opts.title + ' : Archive';
+            return res.render('blog-archive-all');
         }
 
         if ( path.indexOf('archive:') === 0 ) {
@@ -297,28 +303,32 @@ module.exports = function(args) {
             var parts = path.split(/:/)[1].split(/\-/);
             var thisYear = parts[0];
             var thisMonth = parts[1];
+            var template;
+
+            // archive:yyyy
             if ( parts.length === 1 && archive[thisYear] ) {
-                thisArchive[thisYear] = archive[thisYear];
-            }
-            else if ( parts.length === 2 && archive[thisYear] && archive[thisYear][thisMonth] ) {
-                thisArchive[thisYear] = {};
-                thisArchive[thisYear][thisMonth] = archive[thisYear][thisMonth];
-            }
-            else {
-                // don't know this format
-                return next();
+                res.locals.blog.title           = opts.title + ' : Archive : ' + thisYear;
+                res.locals.blog.yearNum         = thisYear;
+                res.locals.blog.thisArchiveYear = archive[thisYear];
+                return res.render('blog-archive-year');
             }
 
-            return res.render('blog-archive', {
-                title       : opts.title + ' : Archive : ' + thisYear + (thisMonth ? '-' + thisMonth : ''),
-                thisArchive : thisArchive,
-            });
+            // archive:yyyy-mm
+            if ( parts.length === 2 && archive[thisYear] && archive[thisYear][thisMonth] ) {
+                res.locals.blog.title            = opts.title + ' : Archive : ' + thisYear + '-' + thisMonth;
+                res.locals.blog.yearNum          = thisYear;
+                res.locals.blog.monthName        = archive[thisYear][thisMonth][0].meta.moment.format('MMM');
+                res.locals.blog.thisArchiveMonth = archive[thisYear][thisMonth];
+                return res.render('blog-archive-month');
+            }
+
+            // don't know this format
+            return next();
         }
 
         if ( path === 'tag' ) {
-            return res.render('blog-tagcloud', {
-                title : opts.title + ' : TagCloud',
-            });
+            res.locals.blog.title = opts.title + ' : TagCloud';
+            return res.render('blog-tag-all');
         }
 
         if ( path.indexOf('tag:') === 0 ) {
@@ -329,19 +339,17 @@ module.exports = function(args) {
                 return next();
             }
 
-            return res.render('blog-tag', {
-                title       : opts.title + ' : Tag : ' + tagName,
-                thesePosts  : tagged[tagName],
-                thisTagName : tagName,
-            });
+            res.locals.blog.title = opts.title + ' : Tag : ' + tagName;
+            res.locals.blog.tagName = tagName;
+            res.locals.blog.thesePosts = tagged[tagName];
+            return res.render('blog-tag-one');
         }
 
         // is this a post
         if ( post[path] ) {
-            return res.render('blog-post', {
-                title    : opts.title + ' : ' + post[path].meta.title,
-                thisPost : post[path],
-            });
+            res.locals.blog.title = opts.title + ' : ' + post[path].meta.title;
+            res.locals.blog.thisPost = post[path];
+            return res.render('blog-post');
         }
 
         // didn't find anything interesting, pass it on
