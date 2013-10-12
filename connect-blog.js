@@ -118,6 +118,16 @@ module.exports = function(args) {
         return 0;
     });
 
+    // make sure each post has a prev and next
+    posts.forEach(function(post, i) {
+        if ( i > 0 ) {
+            post.prev = posts[i-1];
+        }
+        if ( i < posts.length - 1 ) {
+            post.next = posts[i+1];
+        }
+    });
+
     // get a copy of all the posts but reversed
     var reverse = posts.slice(0);
     reverse.reverse();
