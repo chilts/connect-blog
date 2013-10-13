@@ -164,6 +164,78 @@ module.exports = function(args) {
         });
     });
 
+    // make the rss20.xml feed - firstly, make the RSS feed
+    var rss = {
+        '@' : { version : '2.0' },
+        channel : {
+            title         : opts.title,
+            description   : opts.description,
+            link          : 'http://' + opts.domain + opts.base + '/rss20.xml',
+            lastBuildDate : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+            pubDate       : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+            ttl           : 1800,
+            item          : [],
+        }
+    };
+
+    rss.channel.item = posts.map(function(post, i) {
+        return {
+            title       : post.meta.title,
+            description : post.html,
+            link        : 'http://' + opts.domain + opts.base + '/' + post.name,
+            guid        : 'http://' + opts.domain + opts.base + '/' + post.name,
+            pubDate     : post.meta.moment.format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+        };
+    });
+
+    var rssxml = data2xml('rss', rss);
+
+    // make the atom.xml feed
+    var atom = {
+        '@'     : { xmlns : 'http://www.w3.org/2005/Atom' },
+        title   : opts.title,
+        link    : {
+            '@' : {
+                href : 'http://' + opts.domain + opts.base + '/atom.xml',
+                rel  : 'self',
+            },
+        },
+        updated : moment().format(),
+        id      : 'http://' + opts.domain + '/',
+        author  : {
+            name  : 'Andrew Chilton',
+            email : 'andychilton@gmail.com',
+        },
+        entry   : [],
+    };
+
+    atom.entry = posts.map(function(post, i) {
+        return {
+            title   : post.meta.title,
+            id      : 'http://' + opts.domain + opts.base + '/' + post.name,
+            link    : [
+                {
+                    '@' : { href : 'http://' + opts.domain + opts.base + '/' + post.name }
+                },
+                {
+                    '@' : {
+                        href : 'http://' + opts.domain + opts.base + '/' + post.name,
+                        rel : 'self'
+                    }
+                }
+            ],
+            content : {
+                '@' : { type : 'html' },
+                '#' : post.html,
+            },
+            updated : post.meta.moment.format(),
+        };
+    });
+
+    var atomxml = data2xml('feed', atom);
+
+    // ------------------------------------------------------------------------
+
     var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
         res.locals.blog = {
@@ -197,79 +269,13 @@ module.exports = function(args) {
 
         // look for a page that looks like a blog
         if ( path === 'rss20.xml' ) {
-            // firstly, make the RSS feed
-            var rss = {
-                '@' : { version : '2.0' },
-                channel : {
-                    title         : opts.title,
-                    description   : opts.description,
-                    link          : 'http://' + opts.domain + opts.base + '/rss20.xml',
-                    lastBuildDate : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
-                    pubDate       : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
-                    ttl           : 1800,
-                    item          : [],
-                }
-            };
-
-            rss.channel.item = posts.map(function(post, i) {
-                return {
-                    title       : post.meta.title,
-                    description : post.html,
-                    link        : 'http://' + opts.domain + opts.base + '/' + post.name,
-                    guid        : 'http://' + opts.domain + opts.base + '/' + post.name,
-                    pubDate     : post.meta.moment.format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
-                };
-            });
-
             res.set('Content-Type', 'application/xml');
-            return res.send(data2xml('rss', rss));
+            return res.send(rssxml);
         }
 
         if ( path === 'atom.xml' ) {
-
-            var atom = {
-                '@'     : { xmlns : 'http://www.w3.org/2005/Atom' },
-                title   : opts.title,
-                link    : {
-                    '@' : {
-                        href : 'http://' + opts.domain + opts.base + '/atom.xml',
-                        rel  : 'self',
-                    },
-                },
-                updated : moment().format(),
-                id      : 'http://' + opts.domain + '/',
-                author  : {
-                    name  : 'Andrew Chilton',
-                    email : 'andychilton@gmail.com',
-                },
-                entry   : [],
-            };
-
-            atom.entry = posts.map(function(post, i) {
-                return {
-                    title   : post.meta.title,
-                    id      : 'http://' + opts.domain + opts.base + '/' + post.name,
-                    link    : [
-                        {
-                            '@' : { href : 'http://' + opts.domain + opts.base + '/' + post.name }
-                        },
-                        {
-                            '@' : {
-                                href : 'http://' + opts.domain + opts.base + '/' + post.name,
-                                rel : 'self'
-                            }
-                        }
-                    ],
-                    content : {
-                        '@' : { type : 'html' },
-                        '#' : post.html,
-                    },
-                    updated : post.meta.moment.format(),
-                };
-            });
-
             res.set('Content-Type', 'application/xml');
-            return res.send(data2xml('feed', atom));
+            return res.send(atomxml);
         }
 
         if ( path.indexOf('page:') === 0 ) {
