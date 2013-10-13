@@ -96,7 +96,7 @@ var blog = connectBlog({
     description : 'The CSS Minifier Blog, for All Your Minifying Needs!',
     contentDir  : fs.joinPath('/', __dirname, 'blog'),
     domain      : 'cssminifier.com',
-    base        : '/blog',
+    basePath    : '/blog',
 });
 
 app.get( '/blog/',      blog );
