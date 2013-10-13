@@ -33,7 +33,6 @@ var defaults = {
 
 function readBlogSync(opts) {
 
-
     var post  = {};
     var posts = [];
 
@@ -103,6 +102,9 @@ function readBlogSync(opts) {
     posts = Object.keys(post).map(function(name) {
         // get the post itself
         return post[name];
+    }).filter(function(post) {
+        // only return blog posts that have passed their 'datetime' (ie. published)
+        return post.meta.datetime < now;
     }).sort(function(a, b) {
         // sort on datetime
         if ( a.meta.datetime.toISOString() < b.meta.datetime.toISOString() )
