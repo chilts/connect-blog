@@ -31,14 +31,8 @@ var defaults = {
     basePath    : '',
 };
 
-// ----------------------------------------------------------------------------
+function readBlogSync(opts) {
 
-module.exports = function(args) {
-    var opts = xtend({}, defaults, args);
-
-    if ( !opts.domain ) {
-        throw new Error("Provide a domain");
-    }
 
     var post  = {};
     var posts = [];
@@ -234,17 +228,39 @@ module.exports = function(args) {
 
     var atomxml = data2xml('feed', atom);
 
-    // ------------------------------------------------------------------------
+    return {
+        posts   : posts,
+        post    : post,
+        pages   : pages,
+        latest  : latest,
+        archive : archive,
+        tagged  : tagged,
+        rss     : rssxml,
+        atom    : atomxml,
+    };
+}
+
+// ----------------------------------------------------------------------------
+
+module.exports = function(args) {
+    var opts = xtend({}, defaults, args);
+
+    if ( !opts.domain ) {
+        throw new Error("Provide a domain");
+    }
+
+    // read in all the blog data (sync - since it's at server startup) (ToDo: change to async)
+    var data = readBlogSync(opts);
 
     var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
         res.locals.blog = {
             title   : opts.title,
-            posts   : posts,
-            pages   : pages,
-            latest  : latest,
-            archive : archive,
-            tagged  : tagged,
+            posts   : data.posts,
+            pages   : data.pages,
+            latest  : data.latest,
+            archive : data.archive,
+            tagged  : data.tagged,
 
             // Others:
             // * thisPost
@@ -260,22 +276,22 @@ module.exports = function(args) {
         var path = req.params.path;
 
         if ( !path ) {
-            res.locals.blog.thesePosts  = pages[0];
+            res.locals.blog.thesePosts  = data.pages[0];
             res.locals.blog.thisPageNum = 1;
             res.locals.blog.prevUrl     = undefined;
-            res.locals.blog.nextUrl     = pages.length > 1 ? './page:2' : undefined;
+            res.locals.blog.nextUrl     = data.pages.length > 1 ? './page:2' : undefined;
             return res.render('blog-index');
         }
 
         // look for a page that looks like a blog
         if ( path === 'rss20.xml' ) {
             res.set('Content-Type', 'application/xml');
-            return res.send(rssxml);
+            return res.send(data.rss);
         }
 
         if ( path === 'atom.xml' ) {
             res.set('Content-Type', 'application/xml');
-            return res.send(atomxml);
+            return res.send(data.atom);
         }
 
         if ( path.indexOf('page:') === 0 ) {
@@ -287,11 +303,11 @@ module.exports = function(args) {
             //        '1asd' won't give a 1 in the first case, but in the second it will.
             page = +page;
 
-            if ( page > 0 && page <= pages.length ) {
-                res.locals.blog.thesePosts  = pages[page-1];
+            if ( page > 0 && page <= data.pages.length ) {
+                res.locals.blog.thesePosts  = data.pages[page-1];
                 res.locals.blog.thisPageNum = page;
                 res.locals.blog.prevUrl     = page > 1 ? './page:' + (page-1) : undefined;
-                res.locals.blog.nextUrl     = page < pages.length ? './page:' + (page+1) : undefined;
+                res.locals.blog.nextUrl     = page < data.pages.length ? './page:' + (page+1) : undefined;
                 return res.render('blog-index');
             }
 
@@ -312,19 +328,19 @@ module.exports = function(args) {
             var template;
 
             // archive:yyyy
-            if ( parts.length === 1 && archive[thisYear] ) {
+            if ( parts.length === 1 && data.archive[thisYear] ) {
                 res.locals.blog.title           = opts.title + ' : Archive : ' + thisYear;
                 res.locals.blog.yearNum         = thisYear;
-                res.locals.blog.thisArchiveYear = archive[thisYear];
+                res.locals.blog.thisArchiveYear = data.archive[thisYear];
                 return res.render('blog-archive-year');
             }
 
             // archive:yyyy-mm
-            if ( parts.length === 2 && archive[thisYear] && archive[thisYear][thisMonth] ) {
+            if ( parts.length === 2 && data.archive[thisYear] && data.archive[thisYear][thisMonth] ) {
                 res.locals.blog.title            = opts.title + ' : Archive : ' + thisYear + '-' + thisMonth;
                 res.locals.blog.yearNum          = thisYear;
-                res.locals.blog.monthName        = archive[thisYear][thisMonth][0].meta.moment.format('MMM');
-                res.locals.blog.thisArchiveMonth = archive[thisYear][thisMonth];
+                res.locals.blog.monthName        = data.archive[thisYear][thisMonth][0].meta.moment.format('MMM');
+                res.locals.blog.thisArchiveMonth = data.archive[thisYear][thisMonth];
                 return res.render('blog-archive-month');
             }
 
@@ -340,21 +356,21 @@ module.exports = function(args) {
         if ( path.indexOf('tag:') === 0 ) {
             var parts = path.split(/:/);
             var tagName = parts[1];
-            if ( !tagged[tagName] ) {
+            if ( !data.tagged[tagName] ) {
                 // 404 - Not Found
                 return next();
             }
 
-            res.locals.blog.title = opts.title + ' : Tag : ' + tagName;
-            res.locals.blog.tagName = tagName;
-            res.locals.blog.thesePosts = tagged[tagName];
+            res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
+            res.locals.blog.tagName    = tagName;
+            res.locals.blog.thesePosts = data.tagged[tagName];
             return res.render('blog-tag-one');
         }
 
         // is this a post
-        if ( post[path] ) {
-            res.locals.blog.title = opts.title + ' : ' + post[path].meta.title;
-            res.locals.blog.thisPost = post[path];
+        if ( data.post[path] ) {
+            res.locals.blog.title    = opts.title + ' : ' + data.post[path].meta.title;
+            res.locals.blog.thisPost = data.post[path];
             return res.render('blog-post');
         }
 
@@ -364,10 +380,10 @@ module.exports = function(args) {
 
     // prior to returning, let's put these vars onto this middleware so
     // the user can get access to some interesting things
-    middleware.posts   = posts;
-    middleware.latest  = latest;
-    middleware.archive = archive;
-    middleware.tagged  = tagged;
+    middleware.posts   = data.posts;
+    middleware.latest  = data.latest;
+    middleware.archive = data.archive;
+    middleware.tagged  = data.tagged;
 
     return middleware;
 };
