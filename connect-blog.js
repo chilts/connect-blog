@@ -454,6 +454,14 @@ module.exports = function(args) {
     middleware.archive = data.archive;
     middleware.tagged  = data.tagged;
 
+    middleware.reloadData = function() {
+        data = readBlogSync(opts);
+        middleware.posts   = data.posts;
+        middleware.latest  = data.latest;
+        middleware.archive = data.archive;
+        middleware.tagged  = data.tagged;
+    };
+
     return middleware;
 };
 
