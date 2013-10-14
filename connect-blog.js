@@ -12,9 +12,13 @@
 var fs = require('fs');
 
 // npm
-var moment = require('moment');
-var marked = require('marked');
-var xtend = require('xtend');
+var xtend    = require('xtend');
+var ini      = require('ini');
+var yaml     = require('js-yaml');
+var marked   = require('marked');
+var textile  = require('textile-js');
+var escape   = require('escape-html');
+var moment   = require('moment');
 var data2xml = require('data2xml')({
     attrProp : '@',
     valProp  : '#',
@@ -39,29 +43,56 @@ function readBlogSync(opts) {
     var now = new Date();
     var nowMoment = moment(now);
 
+    function debug() {
+        if ( opts.debug ) {
+            console.log.apply(undefined, Array.prototype.slice.call(arguments));
+        }
+    }
+
     // read all the files from the content dir
     var files = fs.readdirSync(opts.contentDir);
+
+    // skip over any directories
+    files = files.filter(function(filename) {
+        return !fs.statSync(opts.contentDir + '/' + filename).isDirectory();
+    });
+
     files.forEach(function(filename) {
+        debug('Reading file ' + filename);
+
         var parts = filename.split(/\./);
         var basename = parts[0];
         var ext = parts[1];
+        var date, dateMoment;
+
+        var thisDate   = now;
+        var thisMoment = nowMoment;
 
         // strip any initial numbers from the post name
-        if ( basename.match(/^\d+-/) ) {
+        var m;
+        if ( m = basename.match(/^\d+-/) ) {
+            console.log(m[0].substr(0, 8));
+            thisDate = new Date( [m[0].substr(0, 4), m[0].substr(4, 2), m[0].substr(6, 2)].join('-'));
+            console.log(thisDate.toISOString());
+            thisMoment = moment(thisDate);
+            console.log('* date=' + thisDate);
             basename = basename.replace(/^\d+-/, '');
         }
+
+        debug('* basename=' + basename);
+        debug('* ext=' + ext);
 
         // set this to a default post with the 'name'
         post[basename] = post[basename] || {
             name    : basename,
             meta    : {
                 title     : basename.split(/-/).map(function(str) { return str.substr(0, 1).toUpperCase() + str.substr(1); }).join(' '),
-                datetime  : now,
-                moment    : nowMoment,
-                year      : nowMoment.format('YYYY'),
-                month     : nowMoment.format('MM'),
-                day       : nowMoment.format('DD'),
-                monthname : nowMoment.format('MMMM'),
+                date      : thisDate,
+                moment    : thisMoment,
+                year      : thisMoment.format('YYYY'),
+                month     : thisMoment.format('MM'),
+                day       : thisMoment.format('DD'),
+                monthname : thisMoment.format('MMMM'),
                 tags    : [],
             },
             content : '',
@@ -70,49 +101,83 @@ function readBlogSync(opts) {
 
         var contents = fs.readFileSync(opts.contentDir + '/' + filename, 'utf8');
 
+        // META
         if ( ext === 'json' ) {
             try {
-                post[basename].meta = JSON.parse(contents);
+                post[basename].meta = xtend({}, post[basename].meta, JSON.parse(contents));
             }
             catch (e) {
                 console.warn('Error parsing ' + filename + ' file : ' + e);
                 process.exit(2);
             }
+        }
+        if ( ext === 'yml' || ext === 'yaml' ) {
+            post[basename].meta = xtend({}, post[basename].meta, yaml.load(contents));
+        }
+        if ( ext === 'ini' ) {
+            post[basename].meta = xtend({}, post[basename].meta, ini.decode(contents));
+        }
 
-            // save this datetime as a regular JavaScript Date()
-            post[basename].meta.datetime = new Date(post[basename].meta.datetime);
-
-            // now save it as a moment()
-            var dtMoment = moment(post[basename].meta.datetime);
-            post[basename].meta.year  = dtMoment.format('YYYY');
-            post[basename].meta.month = dtMoment.format('MM');
-            post[basename].meta.day   = dtMoment.format('DD');
-
-            post[basename].meta.monthname = dtMoment.format('MMMM');
-            post[basename].meta.moment = dtMoment;
+        // CONTENTS
+        if ( ext === 'html' ) {
+            post[basename].content = contents;
+            post[basename].html    = contents;
         }
         if ( ext === 'md' ) {
             post[basename].content = contents;
             post[basename].html = marked(contents);
         }
-        
+        if ( ext === 'textile' ) {
+            post[basename].content = contents;
+            post[basename].html    = textile(contents);
+        }
+        if ( ext === 'text' ) {
+            post[basename].content = contents;
+            post[basename].html    = '<pre>' + escape(contents) + '</pre>';
+        }
     });
 
-    // sort the posts by chronological order
+    // get all the posts into a list
     posts = Object.keys(post).map(function(name) {
-        // get the post itself
         return post[name];
-    }).filter(function(post) {
-        // only return blog posts that have passed their 'datetime' (ie. published)
-        return post.meta.datetime < now;
+    });
+
+    debug('Found ' + posts.length + ' posts');
+
+    // convert and create all the times for all the posts
+    posts.forEach(function(post) {
+        // save this date as a regular JavaScript Date()
+        post.meta.date = new Date(post.meta.date);
+
+        // now save it as a moment()
+        var dtMoment = moment(post.meta.date);
+        post.meta.year  = dtMoment.format('YYYY');
+        post.meta.month = dtMoment.format('MM');
+        post.meta.day   = dtMoment.format('DD');
+
+        post.meta.monthname = dtMoment.format('MMMM');
+        post.meta.moment = dtMoment;
+    });
+
+    debug('Found ' + posts.length + ' posts');
+
+    // sort the posts by chronological order
+    posts = posts.filter(function(post) {
+        // only return blog posts that have passed their 'date' (ie. published)
+        console.log(post.name);
+        console.log(' now=' + now);
+        console.log(' date=' + post.meta.date);
+        return post.meta.date < now;
     }).sort(function(a, b) {
-        // sort on datetime
-        if ( a.meta.datetime.toISOString() < b.meta.datetime.toISOString() )
+        // sort on date
+        if ( a.meta.date.toISOString() < b.meta.date.toISOString() )
             return -1;
-        if ( a.meta.datetime.toISOString() > b.meta.datetime.toISOString() )
+        if ( a.meta.date.toISOString() > b.meta.date.toISOString() )
             return 1;
         return 0;
     });
+
+    debug('Found ' + posts.length + ' posts');
 
     // make sure each post has a prev and next
     posts.forEach(function(post, i) {
@@ -123,6 +188,8 @@ function readBlogSync(opts) {
             post.next = posts[i+1];
         }
     });
+
+    debug('Found ' + posts.length + ' posts');
 
     // get a copy of all the posts but reversed
     var reverse = posts.slice(0);

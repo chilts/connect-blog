@@ -6,10 +6,13 @@
     "main" : "connect-blog.js",
 
     "dependencies" : {
-        "data2xml" : "*",
-        "marked"   : "*",
-        "moment"   : "*",
-        "xtend"    : "*"
+        "data2xml"    : "*",
+        "js-yaml"     : "2.1.x",
+        "textile-js"  : "0.1.x",
+        "escape-html" : "1.0.x",
+        "marked"      : "*",
+        "moment"      : "*",
+        "xtend"       : "*"
     },
 
     "homepage" : "https://github.com/chilts/connect-blog",
