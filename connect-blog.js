@@ -36,9 +36,15 @@ var defaults = {
 };
 
 function readBlogSync(opts) {
-
-    var post  = {};
-    var posts = [];
+    // set up some vars we're going to use
+    var post    = {};
+    var posts   = [];
+    var reverse;
+    var pages   = [];
+    var archive = {};
+    var tagged  = {};
+    var rssXml;
+    var atomXml;
 
     var now = new Date();
     var nowMoment = moment(now);
@@ -65,17 +71,8 @@ function readBlogSync(opts) {
         var ext = parts[1];
         var date, dateMoment;
 
-        var thisDate   = now;
-        var thisMoment = nowMoment;
-
         // strip any initial numbers from the post name
-        var m;
-        if ( m = basename.match(/^\d+-/) ) {
-            console.log(m[0].substr(0, 8));
-            thisDate = new Date( [m[0].substr(0, 4), m[0].substr(4, 2), m[0].substr(6, 2)].join('-'));
-            console.log(thisDate.toISOString());
-            thisMoment = moment(thisDate);
-            console.log('* date=' + thisDate);
+        if ( basename.match(/^\d+-/) ) {
             basename = basename.replace(/^\d+-/, '');
         }
 
@@ -87,12 +84,12 @@ function readBlogSync(opts) {
             name    : basename,
             meta    : {
                 title     : basename.split(/-/).map(function(str) { return str.substr(0, 1).toUpperCase() + str.substr(1); }).join(' '),
-                date      : thisDate,
-                moment    : thisMoment,
-                year      : thisMoment.format('YYYY'),
-                month     : thisMoment.format('MM'),
-                day       : thisMoment.format('DD'),
-                monthname : thisMoment.format('MMMM'),
+                date      : now,
+                moment    : nowMoment,
+                year      : nowMoment.format('YYYY'),
+                month     : nowMoment.format('MM'),
+                day       : nowMoment.format('DD'),
+                monthname : nowMoment.format('MMMM'),
                 tags    : [],
             },
             content : '',
@@ -164,9 +161,6 @@ function readBlogSync(opts) {
     // sort the posts by chronological order
     posts = posts.filter(function(post) {
         // only return blog posts that have passed their 'date' (ie. published)
-        console.log(post.name);
-        console.log(' now=' + now);
-        console.log(' date=' + post.meta.date);
         return post.meta.date < now;
     }).sort(function(a, b) {
         // sort on date
@@ -192,20 +186,18 @@ function readBlogSync(opts) {
     debug('Found ' + posts.length + ' posts');
 
     // get a copy of all the posts but reversed
-    var reverse = posts.slice(0);
+    reverse = posts.slice(0);
     reverse.reverse();
 
     // set up an easy way to access the latest posts
     latest = reverse.slice(0, opts.latestCount);
 
     // make the index pages
-    var pages = [];
     for ( var i = 0; i < posts.length; i += opts.indexCount ) {
         pages.push(reverse.slice(i, i + opts.indexCount));
     }
 
     // make the archive
-    var archive = {};
     posts.forEach(function(post) {
         var year = post.meta.year;
         var month = post.meta.month;
@@ -219,7 +211,6 @@ function readBlogSync(opts) {
     });
 
     // keep a list of all the tagged
-    var tagged = {};
     posts.forEach(function(post) {
         post.meta.tags.forEach(function(tag) {
             tagged[tag] = tagged[tag] || [];
@@ -228,20 +219,20 @@ function readBlogSync(opts) {
     });
 
     // make the rss20.xml feed - firstly, make the RSS feed
-    var rss = {
+    var rssData = {
         '@' : { version : '2.0' },
         channel : {
             title         : opts.title,
             description   : opts.description,
             link          : 'http://' + opts.domain + opts.base + '/rss20.xml',
-            lastBuildDate : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
-            pubDate       : moment().format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+            lastBuildDate : nowMoment.format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
+            pubDate       : nowMoment.format("ddd, DD MMM YYYY HH:mm:ss ZZ"),
             ttl           : 1800,
             item          : [],
         }
     };
 
-    rss.channel.item = posts.map(function(post, i) {
+    rssData.channel.item = posts.map(function(post, i) {
         return {
             title       : post.meta.title,
             description : post.html,
@@ -251,10 +242,10 @@ function readBlogSync(opts) {
         };
     });
 
-    var rssxml = data2xml('rss', rss);
+    rssXml = data2xml('rss', rssData);
 
     // make the atom.xml feed
-    var atom = {
+    var atomData = {
         '@'     : { xmlns : 'http://www.w3.org/2005/Atom' },
         title   : opts.title,
         link    : {
@@ -272,7 +263,7 @@ function readBlogSync(opts) {
         entry   : [],
     };
 
-    atom.entry = posts.map(function(post, i) {
+    atomData.entry = posts.map(function(post, i) {
         return {
             title   : post.meta.title,
             id      : 'http://' + opts.domain + opts.base + '/' + post.name,
@@ -295,7 +286,7 @@ function readBlogSync(opts) {
         };
     });
 
-    var atomxml = data2xml('feed', atom);
+    atomXml = data2xml('feed', atomData);
 
     return {
         posts   : posts,
@@ -304,8 +295,8 @@ function readBlogSync(opts) {
         latest  : latest,
         archive : archive,
         tagged  : tagged,
-        rss     : rssxml,
-        atom    : atomxml,
+        rss     : rssXml,
+        atom    : atomXml,
     };
 }
 
