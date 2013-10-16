@@ -122,7 +122,7 @@ function readBlogSync(opts) {
         }
         if ( ext === 'md' ) {
             post[basename].content = contents;
-            post[basename].html = marked(contents);
+            post[basename].html    = marked(contents);
         }
         if ( ext === 'textile' ) {
             post[basename].content = contents;
