@@ -321,6 +321,8 @@ module.exports = function(args) {
             latest  : data.latest,
             archive : data.archive,
             tagged  : data.tagged,
+            domain  : opts.domain,
+            base    : opts.base,
 
             // Others:
             // * thisPost
