@@ -109,7 +109,13 @@ function readBlogSync(opts) {
             }
         }
         if ( ext === 'yml' || ext === 'yaml' ) {
-            post[basename].meta = xtend({}, post[basename].meta, yaml.load(contents));
+            try {
+                post[basename].meta = xtend({}, post[basename].meta, yaml.load(contents));
+            }
+            catch (e) {
+                console.log('Error parsing file ' + opts.contentDir + '/' + filename);
+                throw e;
+            }
         }
         if ( ext === 'ini' ) {
             post[basename].meta = xtend({}, post[basename].meta, ini.decode(contents));
