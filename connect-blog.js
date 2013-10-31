@@ -388,23 +388,23 @@ module.exports = function(args) {
             return res.render('blog-archive-all');
         }
 
-        if ( path.indexOf('archive:') === 0 ) {
+        if ( path.indexOf('archive-') === 0 ) {
             var thisArchive = {};
-            var parts = path.split(/:/)[1].split(/\-/);
-            var thisYear = parts[0];
-            var thisMonth = parts[1];
+            var parts = path.split(/-/);
+            var thisYear = parts[1];
+            var thisMonth = parts[2];
             var template;
 
-            // archive:yyyy
-            if ( parts.length === 1 && data.archive[thisYear] ) {
+            // archive-yyyy
+            if ( parts.length === 2 && data.archive[thisYear] ) {
                 res.locals.blog.title           = opts.title + ' : Archive : ' + thisYear;
                 res.locals.blog.yearNum         = thisYear;
                 res.locals.blog.thisArchiveYear = data.archive[thisYear];
                 return res.render('blog-archive-year');
             }
 
-            // archive:yyyy-mm
-            if ( parts.length === 2 && data.archive[thisYear] && data.archive[thisYear][thisMonth] ) {
+            // archive-yyyy-mm
+            if ( parts.length === 3 && data.archive[thisYear] && data.archive[thisYear][thisMonth] ) {
                 res.locals.blog.title            = opts.title + ' : Archive : ' + thisYear + '-' + thisMonth;
                 res.locals.blog.yearNum          = thisYear;
                 res.locals.blog.monthName        = data.archive[thisYear][thisMonth][0].meta.moment.format('MMM');
@@ -421,9 +421,9 @@ module.exports = function(args) {
             return res.render('blog-tag-all');
         }
 
-        if ( path.indexOf('tag:') === 0 ) {
-            var parts = path.split(/:/);
-            var tagName = parts[1];
+        if ( path.indexOf('tag-') === 0 ) {
+            var parts = path.split(/-/);
+            var tagName = parts.slice(1).join('-');
             if ( !data.tagged[tagName] ) {
                 // 404 - Not Found
                 return next();
