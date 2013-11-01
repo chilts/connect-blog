@@ -53,7 +53,7 @@ By keeping to this structure, 'connect-blog' knows where to find everything. An 
 
 Please note that the published time of the post comes from the ```datetime``` field and it must be parseable by ```new
 Date(datetime)```. The year and month of that date is also used in the archive. The datetime is used in all templates
-(index, post, archive, tag) and the feeds (RSS, Atom). The ```tags``` are used for the taggging posts and in the
+(index, post, archive, tag) and the feeds (RSS, Atom). The ```tags``` are used for the tagging posts and in the
 tagcloud template. (Of course, you need to write the templates yourself so this could change.)
 
 You can add in any other data you like this ```*.json``` file that you may need in the templates related to each post.
@@ -111,10 +111,10 @@ This will serve the following pages:
 /blog/rss20.xml              - creates a RSS 2.0 XML file
 /blog/atom.xml               - creates an Atom XML file
 /blog/archive                - renders 'blog-archive' template
-/blog/archive:<year>         - renders 'blog-archive' template
-/blog/archive:<year>-<month> - renders 'blog-archive' template
+/blog/archive-<year>         - renders 'blog-archive' template
+/blog/archive-<year>-<month> - renders 'blog-archive' template
 /blog/tag                    - renders 'blog-tagcloud' template
-/blog/tag:<tag-name>         - renders 'blog-tag' template
+/blog/tag-<tag-name>         - renders 'blog-tag' template
 /blog/<post-name>            - renders 'blog-post' template
 ```
 
@@ -205,7 +205,7 @@ Locals   : title -> opts.title + ' Archive'
 ### Year Archive ###
 
 ```
-Page     : /archive:<year>
+Page     : /archive-<year>
 Template : 'blog-archive'
 Locals   : title -> opts.title + ' Archive'
          : thisArchive -> archive[year]
@@ -214,7 +214,7 @@ Locals   : title -> opts.title + ' Archive'
 ### Month Archive ###
 
 ```
-Page     : /archive:<year>-<month>
+Page     : /archive-<year>-<month>
 Template : 'blog-archive'
 Locals   : title -> opts.title + ' Archive'
          : thisArchive -> archive[year][month]
@@ -231,7 +231,7 @@ Locals   : title -> opts.title + ' TagCloud'
 ### Specific Tag ###
 
 ```
-Page     : /tag:<name>
+Page     : /tag-<name>
 Template : 'blog-tag'
 Locals   : title -> opts.title + ' : ' + tag
          : thesePosts -> tagged[tag]
