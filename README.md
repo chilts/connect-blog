@@ -46,13 +46,13 @@ By keeping to this structure, 'connect-blog' knows where to find everything. An 
 ```
 {
     "title" : "My First Post",
-    "datetime : "2013-10-04T02:02:17.516Z",
-    "tags" : [ "css", "html5", "javascript", "app" ]
+    "date"  : "2013-10-04T02:02:17.516Z",
+    "tags"  : [ "css", "html5", "javascript", "app" ]
 }
 ```
 
-Please note that the published time of the post comes from the ```datetime``` field and it must be parseable by ```new
-Date(datetime)```. The year and month of that date is also used in the archive. The datetime is used in all templates
+Please note that the published time of the post comes from the ```date``` field and it must be parseable by ```new
+Date(date)```. The year and month of that date is also used in the archive. The date is used in all templates
 (index, post, archive, tag) and the feeds (RSS, Atom). The ```tags``` are used for the tagging posts and in the
 tagcloud template. (Of course, you need to write the templates yourself so this could change.)
 
@@ -67,7 +67,7 @@ var nowMoment = moment(now);
     name : '...', // same as the filename, e.g. basename.json or basename.md
     meta : {
         title     : basename.split(/-/).map(function(str) { return str.substr(0, 1).toUpperCase() + str.substr(1); }).join(' '),
-        datetime  : now,
+        date      : now,
         moment    : nowMoment,
         year      : nowMoment.format('YYYY'),
         month     : nowMoment.format('MM'),
