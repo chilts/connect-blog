@@ -1,7 +1,7 @@
 {
     "name" : "connect-blog",
     "description" : "Blog middleware you can add to your Connect/Express app, uses a directory of static files.",
-    "version" : "0.9.2",
+    "version" : "0.10.0",
 
     "main" : "connect-blog.js",
 
