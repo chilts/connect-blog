@@ -28,6 +28,9 @@ Imagine a post called ```my-first-post```. Therefore, you require:
 * my-first-post.md
 * my-first-post.json
 
+(Note: you can also use `*.textile` or `*.html` files for the content, or `*.ini` or `*.yaml` files for the meta data
+about the post.)
+
 Once 'connect-blog' has read those files in, it will create a structure similar to the following:
 
 ```
