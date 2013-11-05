@@ -27,12 +27,19 @@ var data2xml = require('data2xml')({
 // ----------------------------------------------------------------------------
 
 var defaults = { 
-    title       : 'Blog',
-    description : '',
-    contentDir  : 'blog',
-    indexCount  : 10,
-    latestCount : 20,
-    basePath    : '',
+    title                : 'Blog',
+    description          : '',
+    contentDir           : 'blog',
+    indexCount           : 10,
+    latestCount          : 20,
+    basePath             : '',
+    indexTemplate        : 'blog-index',
+    postTemplate         : 'blog-post',
+    tagAllTemplate       : 'blog-tag-all',
+    tagOneTemplate       : 'blog-tag-one',
+    archiveAllTemplate   : 'blog-archive-all',
+    archiveYearTemplate  : 'blog-archive-year',
+    archiveMonthTemplate : 'blog-archive-month',
 };
 
 function readBlogSync(opts) {
@@ -348,7 +355,7 @@ module.exports = function(args) {
             res.locals.blog.thisPageNum = 1;
             res.locals.blog.prevUrl     = undefined;
             res.locals.blog.nextUrl     = data.pages.length > 1 ? './page:2' : undefined;
-            return res.render('blog-index');
+            return res.render(opts.indexTemplate);
         }
 
         // look for a page that looks like a blog
@@ -376,7 +383,7 @@ module.exports = function(args) {
                 res.locals.blog.thisPageNum = page;
                 res.locals.blog.prevUrl     = page > 1 ? './page:' + (page-1) : undefined;
                 res.locals.blog.nextUrl     = page < data.pages.length ? './page:' + (page+1) : undefined;
-                return res.render('blog-index');
+                return res.render(opts.indexTemplate);
             }
 
             // unknown page
@@ -385,7 +392,7 @@ module.exports = function(args) {
 
         if ( path === 'archive' ) {
             res.locals.blog.title = opts.title + ' : Archive';
-            return res.render('blog-archive-all');
+            return res.render(opts.archiveAllTemplate);
         }
 
         if ( path.indexOf('archive-') === 0 ) {
@@ -400,7 +407,7 @@ module.exports = function(args) {
                 res.locals.blog.title           = opts.title + ' : Archive : ' + thisYear;
                 res.locals.blog.yearNum         = thisYear;
                 res.locals.blog.thisArchiveYear = data.archive[thisYear];
-                return res.render('blog-archive-year');
+                return res.render(opts.archiveYearTemplate);
             }
 
             // archive-yyyy-mm
@@ -409,7 +416,7 @@ module.exports = function(args) {
                 res.locals.blog.yearNum          = thisYear;
                 res.locals.blog.monthName        = data.archive[thisYear][thisMonth][0].meta.moment.format('MMM');
                 res.locals.blog.thisArchiveMonth = data.archive[thisYear][thisMonth];
-                return res.render('blog-archive-month');
+                return res.render(opts.archiveMonthTemplate);
             }
 
             // don't know this format
@@ -418,7 +425,7 @@ module.exports = function(args) {
 
         if ( path === 'tag' ) {
             res.locals.blog.title = opts.title + ' : TagCloud';
-            return res.render('blog-tag-all');
+            return res.render(opts.tagAllTemplate);
         }
 
         if ( path.indexOf('tag-') === 0 ) {
@@ -432,14 +439,14 @@ module.exports = function(args) {
             res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
             res.locals.blog.tagName    = tagName;
             res.locals.blog.thesePosts = data.tagged[tagName];
-            return res.render('blog-tag-one');
+            return res.render(opts.tagOneTemplate);
         }
 
         // is this a post
         if ( data.post[path] ) {
             res.locals.blog.title    = opts.title + ' : ' + data.post[path].meta.title;
             res.locals.blog.thisPost = data.post[path];
-            return res.render('blog-post');
+            return res.render(opts.postTemplate);
         }
 
         // didn't find anything interesting, pass it on

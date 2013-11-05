@@ -163,13 +163,20 @@ The default options have reasonable (not necessarily sensible) defaults for each
 is the ```domain```.
 
 ```
-var opts = {
-    title       : 'Blog',
-    description : '',
-    contentDir  : 'blog',
-    indexCount  : 10,
-    latestCount : 20,
-    basePath    : '',
+var defaults = {
+    title                : 'Blog',
+    description          : '',
+    contentDir           : 'blog',
+    indexCount           : 10,
+    latestCount          : 20,
+    basePath             : '',
+    indexTemplate        : 'blog-index',
+    postTemplate         : 'blog-post',
+    tagAllTemplate       : 'blog-tag-all',
+    tagOneTemplate       : 'blog-tag-one',
+    archiveAllTemplate   : 'blog-archive-all',
+    archiveYearTemplate  : 'blog-archive-year',
+    archiveMonthTemplate : 'blog-archive-month',
 };
 ```
 
