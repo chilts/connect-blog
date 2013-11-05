@@ -1,5 +1,7 @@
 # connect-blog #
 
+Blog middleware you can add to your Connect/Express app, uses a directory of static files.
+
 ## Synopsis ##
 
 ```
