@@ -6,6 +6,7 @@
     "main" : "connect-blog.js",
 
     "dependencies" : {
+        "blogz"       : "*",
         "data2xml"    : "*",
         "js-yaml"     : "2.1.x",
         "textile-js"  : "0.1.x",

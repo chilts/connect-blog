@@ -13,9 +13,7 @@ var fs = require('fs');
 
 // npm
 var xtend = require('xtend');
-
-// local
-var readBlogSync = require('./lib/read-blog.js');
+var blogz = require('blogz');
 
 // ----------------------------------------------------------------------------
 
@@ -45,7 +43,7 @@ module.exports = function(args) {
     }
 
     // read in all the blog data (sync - since it's at server startup) (ToDo: change to async)
-    var data = readBlogSync(opts);
+    var data = blogz.readSync(opts);
 
     var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
