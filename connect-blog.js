@@ -71,7 +71,7 @@ module.exports = function(args) {
         var path = req.params.path;
 
         if ( !path ) {
-            res.locals.blog.thesePosts  = data.pages[0];
+            res.locals.blog.thesePosts  = data.latest;
             res.locals.blog.thisPageNum = 1;
             res.locals.blog.prevUrl     = undefined;
             res.locals.blog.nextUrl     = data.pages.length > 1 ? './page:2' : undefined;
