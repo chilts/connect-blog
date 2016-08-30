@@ -1,22 +1,12 @@
 {
     "name" : "connect-blog",
     "description" : "Blog middleware you can add to your Connect/Express app, uses a directory of static files.",
-    "version" : "0.12.0",
-
+    "version" : "1.0.0",
     "main" : "connect-blog.js",
-
     "dependencies" : {
-        "blogz"       : "0.3.x",
-        "data2xml"    : "*",
-        "js-yaml"     : "2.1.x",
-        "textile-js"  : "0.1.x",
-        "escape-html" : "1.0.x",
-        "marked"      : "*",
-        "moment"      : "*",
-        "ini"         : "*",
+        "blogz"       : "1.x",
         "xtend"       : "*"
     },
-
     "homepage" : "https://github.com/chilts/connect-blog",
     "repository" : {
         "type" : "git",
@@ -26,15 +16,14 @@
         "url" : "https://github.com/chilts/connect-blog/issues",
         "email" : "andychilton@gmail.com"
     },
-
     "author" : {
         "name" : "Andrew Chilton",
         "email" : "andychilton@gmail.com",
         "url" : "http://chilts.org/"
     },
+    "tags" : [ "connect", "express", "blog", "feed" ],
     "licenses" : [{
         "type" : "MIT",
         "url" : "http://chilts.mit-license.org/2013"
-    }],
-    "tags" : [ "connect", "express", "blog", "feed" ]
+    }]
 }
