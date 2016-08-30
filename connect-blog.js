@@ -73,6 +73,7 @@ module.exports = function(args) {
 
         var path = req.params.path;
 
+        // this is the index
         if ( !path ) {
             res.locals.blog.thesePosts  = data.pages[0];
             res.locals.blog.thisPageNum = 1;
@@ -173,7 +174,7 @@ module.exports = function(args) {
         if ( path.indexOf('category-') === 0 ) {
             var parts = path.split(/-/);
             var catName = parts.slice(1).join('-');
-            if ( !data.category[tagName] ) {
+            if ( !data.category[catName] ) {
                 // 404 - Not Found
                 return next();
             }
@@ -197,17 +198,19 @@ module.exports = function(args) {
 
     // prior to returning, let's put these vars onto this middleware so
     // the user can get access to some interesting things
-    middleware.posts   = data.posts;
-    middleware.latest  = data.latest;
-    middleware.archive = data.archive;
-    middleware.tagged  = data.tagged;
+    middleware.posts    = data.posts;
+    middleware.latest   = data.latest;
+    middleware.archive  = data.archive;
+    middleware.tag      = data.tag;
+    middleware.category = data.category;
 
     middleware.reloadData = function() {
         data = readBlogSync(opts);
-        middleware.posts   = data.posts;
-        middleware.latest  = data.latest;
-        middleware.archive = data.archive;
-        middleware.tagged  = data.tagged;
+        middleware.posts    = data.posts;
+        middleware.latest   = data.latest;
+        middleware.archive  = data.archive;
+        middleware.tag      = data.tag;
+        middleware.category = data.category;
     };
 
     return middleware;

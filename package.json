@@ -4,7 +4,7 @@
     "version" : "1.1.0",
     "main" : "connect-blog.js",
     "dependencies" : {
-        "blogz"       : "1.x",
+        "blogz"       : "1.1.x",
         "xtend"       : "*"
     },
     "homepage" : "https://github.com/chilts/connect-blog",
