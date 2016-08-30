@@ -28,6 +28,8 @@ var defaults = {
     postTemplate         : 'blog-post',
     tagAllTemplate       : 'blog-tag-all',
     tagOneTemplate       : 'blog-tag-one',
+    catAllTemplate       : 'blog-category-all',
+    catOneTemplate       : 'blog-category-one',
     archiveAllTemplate   : 'blog-archive-all',
     archiveYearTemplate  : 'blog-archive-year',
     archiveMonthTemplate : 'blog-archive-month',
@@ -48,14 +50,15 @@ module.exports = function(args) {
     var middleware = function(req, res, next) {
         // for every page (and a side-effect for the feeds), give them each access to these things
         res.locals.blog = {
-            title   : opts.title,
-            posts   : data.posts,
-            pages   : data.pages,
-            latest  : data.latest,
-            archive : data.archive,
-            tagged  : data.tagged,
-            domain  : opts.domain,
-            base    : opts.base,
+            title    : opts.title,
+            posts    : data.posts,
+            pages    : data.pages,
+            latest   : data.latest,
+            archive  : data.archive,
+            tag      : data.tag,
+            category : data.category,
+            domain   : opts.domain,
+            base     : opts.base,
 
             // Others:
             // * thisPost
@@ -151,15 +154,34 @@ module.exports = function(args) {
         if ( path.indexOf('tag-') === 0 ) {
             var parts = path.split(/-/);
             var tagName = parts.slice(1).join('-');
-            if ( !data.tagged[tagName] ) {
+            if ( !data.tag[tagName] ) {
                 // 404 - Not Found
                 return next();
             }
 
             res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
             res.locals.blog.tagName    = tagName;
-            res.locals.blog.thesePosts = data.tagged[tagName];
+            res.locals.blog.thesePosts = data.tag[tagName];
             return res.render(opts.tagOneTemplate);
+        }
+
+        if ( path === 'category' ) {
+            res.locals.blog.title = opts.title + ' : CategoryCloud';
+            return res.render(opts.catAllTemplate);
+        }
+
+        if ( path.indexOf('category-') === 0 ) {
+            var parts = path.split(/-/);
+            var catName = parts.slice(1).join('-');
+            if ( !data.category[tagName] ) {
+                // 404 - Not Found
+                return next();
+            }
+
+            res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
+            res.locals.blog.catName    = catName;
+            res.locals.blog.thesePosts = data.category[catName];
+            return res.render(opts.catOneTemplate);
         }
 
         // is this a post
