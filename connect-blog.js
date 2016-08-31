@@ -18,7 +18,7 @@ var blogz = require('blogz');
 // ----------------------------------------------------------------------------
 
 var defaults = { 
-    title                : 'Blog',
+    title                : '',
     description          : '',
     contentDir           : 'blog',
     indexCount           : 10,
@@ -115,7 +115,7 @@ module.exports = function(args) {
         }
 
         if ( path === 'archive' ) {
-            res.locals.blog.title = opts.title + ' : Archive';
+            res.locals.blog.title = 'Archive';
             return res.render(opts.archiveAllTemplate);
         }
 
@@ -128,7 +128,7 @@ module.exports = function(args) {
 
             // archive-yyyy
             if ( parts.length === 2 && data.archive[thisYear] ) {
-                res.locals.blog.title           = opts.title + ' : Archive : ' + thisYear;
+                res.locals.blog.title           = 'Archive : ' + thisYear;
                 res.locals.blog.yearNum         = thisYear;
                 res.locals.blog.thisArchiveYear = data.archive[thisYear];
                 return res.render(opts.archiveYearTemplate);
@@ -136,7 +136,7 @@ module.exports = function(args) {
 
             // archive-yyyy-mm
             if ( parts.length === 3 && data.archive[thisYear] && data.archive[thisYear][thisMonth] ) {
-                res.locals.blog.title            = opts.title + ' : Archive : ' + thisYear + '-' + thisMonth;
+                res.locals.blog.title            = 'Archive : ' + thisYear + '-' + thisMonth;
                 res.locals.blog.yearNum          = thisYear;
                 res.locals.blog.monthName        = data.archive[thisYear][thisMonth][0].meta.moment.format('MMM');
                 res.locals.blog.thisArchiveMonth = data.archive[thisYear][thisMonth];
@@ -148,7 +148,7 @@ module.exports = function(args) {
         }
 
         if ( path === 'tag' ) {
-            res.locals.blog.title = opts.title + ' : TagCloud';
+            res.locals.blog.title = 'Tags';
             return res.render(opts.tagAllTemplate);
         }
 
@@ -160,14 +160,14 @@ module.exports = function(args) {
                 return next();
             }
 
-            res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
+            res.locals.blog.title      = 'Tag : ' + tagName;
             res.locals.blog.tagName    = tagName;
             res.locals.blog.thesePosts = data.tag[tagName];
             return res.render(opts.tagOneTemplate);
         }
 
         if ( path === 'category' ) {
-            res.locals.blog.title = opts.title + ' : CategoryCloud';
+            res.locals.blog.title = 'Categories';
             return res.render(opts.catAllTemplate);
         }
 
@@ -179,7 +179,7 @@ module.exports = function(args) {
                 return next();
             }
 
-            res.locals.blog.title      = opts.title + ' : Tag : ' + tagName;
+            res.locals.blog.title      = 'Tag : ' + tagName;
             res.locals.blog.catName    = catName;
             res.locals.blog.thesePosts = data.category[catName];
             return res.render(opts.catOneTemplate);
@@ -187,7 +187,7 @@ module.exports = function(args) {
 
         // is this a post
         if ( data.post[path] ) {
-            res.locals.blog.title    = opts.title + ' : ' + data.post[path].meta.title;
+            res.locals.blog.title    = data.post[path].meta.title;
             res.locals.blog.thisPost = data.post[path];
             return res.render(opts.postTemplate);
         }
