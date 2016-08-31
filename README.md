@@ -78,6 +78,7 @@ var nowMoment = moment(now);
         month     : nowMoment.format('MM'),
         day       : nowMoment.format('DD'),
         monthname : nowMoment.format('MMMM'),
+        category  : 'general',
         tags    : [],
     },
     content : '',
@@ -87,7 +88,8 @@ var nowMoment = moment(now);
 
 This default post is set so that if you just have ```basename.md``` and no ```basename.json```, then the blog will
 still render and not throw errors. Same if you have ```basename.json``` but not ```basename.md``` (but that wouldn't be
-much good either).
+much good either). Basically anything to stop it crashing, however you should check that your blog is being rendered as
+you want it prior to publishing.
 
 ## Synopsis ##
 
