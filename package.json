@@ -19,7 +19,7 @@
     "author" : {
         "name" : "Andrew Chilton",
         "email" : "andychilton@gmail.com",
-        "url" : "http://chilts.org/"
+        "url" : "https://chilts.org/"
     },
     "tags" : [ "connect", "express", "blog", "feed" ],
     "licenses" : [{
