@@ -179,7 +179,7 @@ module.exports = function(args) {
                 return next();
             }
 
-            res.locals.blog.title      = 'Tag : ' + tagName;
+            res.locals.blog.title      = 'Category : ' + catName;
             res.locals.blog.catName    = catName;
             res.locals.blog.thesePosts = data.category[catName];
             return res.render(opts.catOneTemplate);
