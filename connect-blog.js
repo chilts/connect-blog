@@ -93,6 +93,11 @@ module.exports = function(args) {
             return res.send(data.atom);
         }
 
+        if ( path === 'feed.json' ) {
+            res.set('Content-Type', 'application/xml');
+            return res.send(data.json);
+        }
+
         if ( path.indexOf('page:') === 0 ) {
             // Note: the pages are 1..10, but our pages array is 0..9.
             var page = path.split(/:/)[1];
