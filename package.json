@@ -1,29 +1,31 @@
 {
-    "name" : "connect-blog",
-    "description" : "Blog middleware you can add to your Connect/Express app, uses a directory of static files.",
-    "version" : "1.3.1",
-    "main" : "connect-blog.js",
-    "dependencies" : {
-        "blogz"       : "*",
-        "xtend"       : "*"
+    "name": "connect-blog",
+    "description": "Blog middleware you can add to your Connect/Express app, uses a directory of static files.",
+    "version": "1.3.1",
+    "main": "connect-blog.js",
+    "dependencies": {
+        "blogz": "*",
+        "xtend": "*"
     },
-    "homepage" : "https://github.com/chilts/connect-blog",
-    "repository" : {
-        "type" : "git",
-        "url" : "git://github.com/chilts/connect-blog.git"
+    "homepage": "https://github.com/chilts/connect-blog",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/chilts/connect-blog.git"
     },
-    "bugs" : {
-        "url" : "https://github.com/chilts/connect-blog/issues",
-        "email" : "andychilton@gmail.com"
+    "bugs": {
+        "url": "https://github.com/chilts/connect-blog/issues",
+        "email": "andychilton@gmail.com"
     },
-    "author" : {
-        "name" : "Andrew Chilton",
-        "email" : "andychilton@gmail.com",
-        "url" : "https://chilts.org/"
+    "author": {
+        "name": "Andrew Chilton",
+        "email": "andychilton@gmail.com",
+        "url": "https://chilts.org/"
     },
-    "tags" : [ "connect", "express", "blog", "feed" ],
-    "licenses" : [{
-        "type" : "MIT",
-        "url" : "http://chilts.mit-license.org/2013"
-    }]
+    "tags": [
+        "connect",
+        "express",
+        "blog",
+        "feed"
+    ],
+    "license": "MIT"
 }
