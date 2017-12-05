@@ -94,7 +94,7 @@ module.exports = function(args) {
         }
 
         if ( path === 'feed.json' ) {
-            res.set('Content-Type', 'application/xml');
+            res.set('Content-Type', 'application/json');
             return res.send(data.json);
         }
 
