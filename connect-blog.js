@@ -57,6 +57,7 @@ module.exports = function(args) {
             archive  : data.archive,
             tag      : data.tag,
             category : data.category,
+            author   : data.author,
             domain   : opts.domain,
             base     : opts.base,
 
